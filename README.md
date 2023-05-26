@@ -4,8 +4,3 @@ Commit
 Otro commit!
 Time tracker
 PUSH AL REPO!
-Otro push!
-Otro push mas
-Otro push!
-Otro push!
-Otro mas
