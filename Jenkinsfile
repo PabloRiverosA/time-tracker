@@ -1,44 +1,63 @@
 pipeline {
     agent any
-
+    
     tools {
-        // Install the Maven version configured as "M3" and add it to the path.
-        maven "Maven3"
-        jdk "Java11"
+        //Herramientas a utilizar
+        // Necesito Maven y JDK
+        //maven "nombre de herramienta  ue esta en la configuracion de globl tools configuration"
+        maven "Maven"
+        jdk "java11"
     }
-
+    
+    environment {
+        DISABLE_AUTH = 'true'
+        DB_ENGINE    = 'sqlite'
+    }
+    
     stages {
-        stage('Build') {
+        stage('Hello') {
             steps {
-                // Get some code from a GitHub repository
-                git branch: 'master', url: 'https://github.com/bellyster/time-tracker.git'
-
-                // Run Maven on a Unix agent.
-                //sh "mvn -Dmaven.test.failure.ignore=true clean package"
-
-                // To run Maven on a Windows agent, use
-                bat "mvn clean package -DskipTests"
-            }
-
-            post {
-                // failed, record the artifacts.
-                success {
-                    echo 'Archivando artefacto'
-                    archiveArtifacts 'core/target/*.jar'
-                    archiveArtifacts 'web/target/*.war'
-                }
+                //echo 'Hello World'
+                echo "Database engine is ${DB_ENGINE}"
+                echo "DISABLE_AUTH is ${DISABLE_AUTH}"
+                echo "Running ${env.BUILD_ID} on ${env.JENKINS_URL}"
+                echo ""
             }
         }
+        
+        //stage('Descargar código de git'){
+        stage('Git Polling')
+        {    
+           steps 
+            {
+            
+            //git branch: 'master', url:'https://github.com/PabloRiverosA/time-tracker.git'
+            git branch: 'master', credentialsId: 'JenkisGit-PabloRiverosA', url: 'git@github.com:PabloRiverosA/time-tracker.git'
+            
+            }
+            
+        }
+        
+        stage ('BUILD CON MAVEN'){
+        steps {
+            bat "mvn clean package -DsKipTests" //Windows
+            
+                }
+        post{
+            success{
+                echo 'Archivar Artefactos'
+                archiveArtifacts "/core/target/*.jar"
+                archiveArtifacts "/web/target/*.war"
 
-        stage('UNIT TESTS'){
-             steps{
-                 //Unix version
-                 //sh: 'mvn test'
-                 //Ejecutar los tests
-                 echo 'Ejecutando Tests'
-                 bat "mvn test"
-                 }
-             }
-
+            }
+                    }
+        }
+        
+        stage ('Test Maven'){
+            steps {
+                bat "mvn test"
+                
+            }
+        }
+        
     }
-}
